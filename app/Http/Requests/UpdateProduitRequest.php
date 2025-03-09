@@ -26,7 +26,7 @@ class UpdateProduitRequest extends FormRequest
             "nom_produit" => "required|min:4|max:255",
             "category_id" => "required|exists:categories,id",
             "prix_p" => "required|numeric|min:0",
-            "code_barre" => ['required', Rule::unique('produits')->ignore($this->produit->id)]
+            "code_barre" => ['required', "unique:produits,code_barre"]
         ];
     }
 }

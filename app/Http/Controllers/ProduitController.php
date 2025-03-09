@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
+use App\Models\Produit;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProduitRequest;
-use App\Models\Category;
-use App\Models\Produit;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class ProduitController extends Controller
 {
@@ -81,32 +82,31 @@ class ProduitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProduitRequest $request, Produit $produit)
+    public function update(Request $request, Produit $produit)
     {
         
-       $data =  $request->validated();
+        $data = $request->validate([
+            'nom_produit' => 'required',
+            'prix_p' => 'required',
+            'category_id' => 'required',
+            'photo' => 'nullable|mimes:jpeg,png,jpg,gif|max:2048',
+            'code_barre' => 'required',
+        ]);
+    
         
-       if ($request->hasFile('photo')) {
-            
-            $request->validate([
-               
-                "photo" => "image|mimes:jpeg,png,jpg|max:2048",
-            
-            ]);
-            
-            $image = $request->file("photo");
-        
-            $path = $image->store("products", "public");
-            
-        
+        if ($request->hasFile('photo')) {
+            $image = $request->file('photo');
+            $path = $image->store('products', 'public');
             $data['photo'] = $path;
-
-        }    
+        } else {
+            $data['photo'] = $produit->photo;
+        }
+    
         
         $produit->update($data);
+    
         
-        return redirect()->route('produits.index')->with('success', 'Produit modifiee avec succès');
-        
+        return redirect()->route('produits.index')->with('success', 'Produit modifié avec succès');
     }
 
     /**

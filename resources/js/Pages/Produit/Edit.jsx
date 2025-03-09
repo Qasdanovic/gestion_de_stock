@@ -1,35 +1,52 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm, Head } from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 function Edit({errors, categories,produit}) {
 
-    const { data, setData, put, processing } = useForm({
+    const { data, setData, post, processing } = useForm({
         "nom_produit": produit.nom_produit,
         "category_id": produit.category_id,
-        "photo": produit.photo,
         "prix_p": produit.prix_p,
+        "photo" : null,
         "code_barre": produit.code_barre,
     });
+
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setData("photo", file);
       };
 
-
+      
     const formHandling = (e) => {
         e.preventDefault();
+        
+        const formData = new FormData();
 
-    const formData = new FormData();
+        formData.append("nom_produit", data.nom_produit);
+        formData.append("prix_p", data.prix_p);
+        formData.append("category_id", data.category_id);
+        // formData.append("photo", data.photo);
+        if (data.photo) {
+            formData.append("photo", data.photo);
+        }
 
-    formData.append("nom_produit", data.nom_produit);
-    formData.append("prix_p", data.prix_p);
-    formData.append("category_id", data.category_id);
-    formData.append("photo", data.photo);
-    formData.append("code_barre", data.code_barre);
+        formData.append("code_barre", data.code_barre);
 
-    put(route('produits.update', produit.id), formData);
+        formData.append("_method", "PUT");
+
+        // // return console.log(formData)
+        // for (let pair of formData.entries()) {
+        //     console.log(pair[0] + ':', pair[1]);
+        // }
+        
+
+        
+
+        post(route('produits.update', produit.id), formData, {
+            forceFormData: true,
+        });
     }
     
     return (
@@ -46,7 +63,7 @@ function Edit({errors, categories,produit}) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                        <form onSubmit={formHandling} className="space-y-6">
+                        <form onSubmit={formHandling} className="space-y-6"  encType="multipart/form-data">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="flex flex-col space-y-2">
                                         <label htmlFor="nom_produit" className="text-sm font-medium text-gray-700">
@@ -91,7 +108,7 @@ function Edit({errors, categories,produit}) {
                                             <option value="">choisir un categorie :</option>
                                             {
                                                 categories.map((cat) => (
-                                                    <option key={cat.id} value={cat.id} selected={cat.id === produit.id} >{cat.nom_cat}</option>
+                                                    <option key={cat.id} value={cat.id} selected={cat.id === produit.category_id} >{cat.nom_cat}</option>
                                                 ))
                                             }
                                         </select>
